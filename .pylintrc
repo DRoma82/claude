@@ -1,0 +1,5 @@
+[master]
+no-space-check=trailing-comma
+
+[format]
+max-line-length=120
