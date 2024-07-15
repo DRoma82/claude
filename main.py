@@ -1,4 +1,6 @@
 from prompt_toolkit import PromptSession
+from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.keys import Keys
 from prompt_toolkit.completion import WordCompleter
 from GptClient import GptClient
 from GptFile import GptFile
@@ -12,20 +14,22 @@ async def main():
     file = GptFile()
 
     command_completer = WordCompleter(['b', 'bd', 'w', 'q', 'wq'])
-    session = PromptSession(multiline=True, completer=command_completer)
+    kb = KeyBindings()
+
+    @kb.add(Keys.Escape, Keys.Enter)  # Alt-Enter
+    def _(event):
+        event.current_buffer.validate_and_handle()
+
+    session = PromptSession(multiline=True, completer=command_completer, key_bindings=kb)
 
     while True:
         try:
             input = await session.prompt_async(
                 '[YOU]: ',
-                accept_default=True,
-                default='',
+                accept_default=False
             )
 
-            lines = input.split('\n')
-            while lines and not lines[-1].strip():
-                lines.pop()
-            input = '\n'.join(lines)
+            input = input.strip()
 
             if not input:
                 continue

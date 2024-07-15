@@ -17,18 +17,26 @@ class GptClient:
         messages = [{'role': m.role, 'content': m.content} for m in file.messages]
         message = GptMessage(role="assistant", content="")
         message.print_header()
-        async with self.client.messages.stream(
-            model=self.model,
-            messages=messages,
-            max_tokens=self.max_tokens,
-        ) as stream:
+
+        try:
+
+            stream = self.client.messages.stream(
+                model=self.model,
+                messages=messages,
+                max_tokens=self.max_tokens,
+                stream=True
+            )
+
             buffer = []
-            async for message in stream:
-                if message.type == 'content_block_delta':
-                    delta = message.delta.text
+            async for chunk in stream:
+                if chunk.type == 'content_block':
+                    delta = chunk.content[0].text
                     buffer.append(delta)
                     print(delta, end='', flush=True)
 
             response = ''.join(buffer)
             message.content = response
+            return message
+        except Exception as e:
+            message.content = f"I'm sorry but I encountered an error: {str(e)}"
             return message

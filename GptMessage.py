@@ -13,6 +13,7 @@ class GptMessage:
 
     def print(self):
         self.print_header()
+        print(f' {self.content}')
         if not self.content.endswith('\n'):
             print()
 

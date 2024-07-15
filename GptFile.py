@@ -68,7 +68,7 @@ class GptFile:
             json.dump({
                 'filename': self.filename,
                 'messages': [{'role': m.role, 'content': m.content} for m in self.messages],
-                'modified': false
+                'modified': False
             }, f, indent=2)
         self.save_buffer()
         GptMessage.app_message(f"History saved to {path}")

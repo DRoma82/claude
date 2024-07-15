@@ -10,7 +10,7 @@ class Cmd:
             raise ValueError(f"Invalid command: {input}")
 
         self.is_force = input.endswith('!')
-        self.name = input.lsrip(':').rstrip('!')
+        self.name = input.lstrip(':').rstrip('!')
 
     @classmethod
     def is_cmd(cls, input):
