@@ -1,26 +1,36 @@
-import anthropic
+import yaml
+from openai import AzureOpenAI
 from GptMessage import GptMessage
 from GptFile import GptFile
 
 
 class GptClient:
     def __init__(self):
-        self.client = anthropic.AsyncAnthropic(api_key=self.get_api_key())
-        print(self.client.api_key)
-        self.model = 'claude-3-sonnet-20240229'
-        self.max_tokens = 1024
+        with open('secrets.yaml', 'r') as file:
+            config = yaml.safe_load(file)
 
-    def get_api_key(self) -> str:
-        with open('.key', 'r') as file:
-            return file.read().replace('\n', '').strip()
+        self.client = AzureOpenAI(
+                api_key=config['api_key'],
+                azure_endpoint=config['url'],
+                api_version=config['api_version']
+        )
+        self.model = config['deployment']
 
     async def query(self, file: GptFile) -> GptMessage:
+        message = GptMessage(role='assistant', content='')
+        message.print_header()
+
         messages = [{'role': m.role, 'content': m.content} for m in file.messages]
 
-        response = await self.client.messages.create(
+        stream = self.client.chat.completions.create(
             model=self.model,
             messages=messages,
-            max_tokens=self.max_tokens,
+            stream=True
         )
 
-        return GptMessage(role='ASSISTANT', content=response.content[0].text)
+        async for chunk in stream:
+            content = chunk.choices[0].delta.content
+            message.content += content
+            print(content, end='', flush=True)
+
+        return message
