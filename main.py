@@ -49,10 +49,14 @@ async def main():
             print()
             print('Thinking...')
 
-            response = await client.query(file)
-            file.append(response)
+            try:
+                response = await client.query(file)
+                response.print()
+                file.append(response)
+                print()
+            except Exception as e:
+                GptMessage.app_message(f"Error: {str(e)} ", error=True)
 
-            print()
         except KeyboardInterrupt:
             print("Goodbye!")
             break
